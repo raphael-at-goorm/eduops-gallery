@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Events — Prestige Events</title>
+  <meta name="description" content="Browse all premium event galleries. Filter by year, category, or search for a specific event.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Header (injected by JS) -->
+  <div id="site-header"></div>
+
+  <main>
+
+    <!-- ═══════════════════════════════════════════
+         Page Header
+    ═══════════════════════════════════════════ -->
+    <div class="page-header">
+      <div class="container">
+        <p class="page-header__eyebrow">Gallery Collection</p>
+        <h1 class="page-header__title">All Events</h1>
+        <p class="page-header__subtitle">
+          Explore our complete collection of event galleries — each one
+          a curated record of exceptional moments.
+        </p>
+      </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════
+         Filters + Listing
+    ═══════════════════════════════════════════ -->
+    <section class="section" style="padding-top:var(--space-10);" aria-label="이벤트 목록">
+      <div class="container">
+
+        <!-- Filters -->
+        <div class="filters-bar" role="search" aria-label="이벤트 검색 및 필터">
+
+          <!-- Search -->
+          <div class="search-wrap">
+            <span class="search-wrap__icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="10.5" cy="10.5" r="6.5"/>
+                <path d="M21 21l-4.5-4.5"/>
+              </svg>
+            </span>
+            <input
+              type="search"
+              id="search-input"
+              placeholder="Search events…"
+              aria-label="이벤트 검색"
+              autocomplete="off"
+            >
+          </div>
+
+          <!-- Year filter -->
+          <select id="filter-year" class="filter-select" aria-label="연도 필터">
+            <option value="">All Years</option>
+          </select>
+
+          <!-- Category filter -->
+          <select id="filter-category" class="filter-select" aria-label="카테고리 필터">
+            <option value="">All Categories</option>
+          </select>
+
+          <!-- Result count -->
+          <span class="filters-count" id="events-count" aria-live="polite" aria-atomic="true"></span>
+
+        </div>
+
+        <!-- Event grid (populated by events.js) -->
+        <div id="events-list" class="events-grid events-grid--3" role="list" aria-label="이벤트 갤러리 목록">
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer (injected by JS) -->
+  <div id="site-footer"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/events.js"></script>
+</body>
+</html>
