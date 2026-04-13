@@ -3,6 +3,42 @@
  * 모든 페이지에서 공통으로 사용하는 컴포넌트 함수들
  */
 
+/* ── Google Drive URL 변환 ──────────────────────────────── */
+
+/**
+ * Google Drive 공유 링크를 <img> 태그에서 바로 쓸 수 있는 URL로 변환합니다.
+ *
+ * 지원 형식:
+ *   https://drive.google.com/file/d/FILE_ID/view?usp=sharing  ← 공유 링크
+ *   https://drive.google.com/open?id=FILE_ID
+ *   https://drive.google.com/uc?export=view&id=FILE_ID        ← 이미 변환된 형식
+ *   그 외 일반 URL                                             ← 그대로 반환
+ *
+ * @param {string} url
+ * @param {boolean} [fullSize=false]  true면 원본 화질 URL, false면 썸네일 URL
+ * @returns {string}
+ */
+function driveToImg(url, fullSize) {
+  if (!url) return '';
+
+  // /file/d/FILE_ID/...  형식
+  var m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (!m) {
+    // ?id=FILE_ID 또는 &id=FILE_ID 형식
+    m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  }
+
+  if (m) {
+    var id = m[1];
+    return fullSize
+      ? 'https://drive.google.com/uc?export=view&id=' + id
+      : 'https://lh3.googleusercontent.com/d/' + id;
+  }
+
+  return url; // Google Drive URL이 아니면 그대로 반환
+}
+
+
 /* ── SVG Icons ─────────────────────────────────────────── */
 
 function iconCalendar() {
@@ -39,7 +75,7 @@ function renderFeaturedCard(event) {
     <a href="event.html?slug=${event.slug}" class="featured-card" aria-label="${event.title} 갤러리 보기">
       <div class="featured-card__image-wrap">
         <img
-          src="${event.coverImage}"
+          src="${driveToImg(event.coverImage)}"
           alt="${event.title}"
           loading="lazy"
         >
@@ -77,7 +113,7 @@ function renderEventCard(event) {
     <a href="event.html?slug=${event.slug}" class="event-card" aria-label="${event.title} 갤러리 보기">
       <div class="event-card__image-wrap">
         <img
-          src="${event.coverImage}"
+          src="${driveToImg(event.coverImage)}"
           alt="${event.title}"
           loading="lazy"
         >

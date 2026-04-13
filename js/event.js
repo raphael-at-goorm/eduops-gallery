@@ -103,7 +103,7 @@ function renderEventHero(event) {
         </div>
         <div class="event-hero__cover">
           <img
-            src="${event.coverImage}"
+            src="${driveToImg(event.coverImage)}"
             alt="${escapeHtml(event.title)} 대표 이미지"
             loading="eager"
           >
@@ -178,16 +178,19 @@ function buildEmptyGalleryHtml(event) {
 function buildGalleryHtml(images, event) {
   var items = images.map(function (img, idx) {
     var isLarge = idx === 0;
+    var thumbSrc = driveToImg(img.thumb || img.url);        // 썸네일: lh3 형식
+    var fullSrc  = driveToImg(img.url, true);               // 라이트박스: 원본 화질
     return `
       <div
         class="gallery-item${isLarge ? ' gallery-item--lg' : ''}"
         data-index="${idx}"
+        data-full="${escapeHtml(fullSrc)}"
         role="button"
         tabindex="0"
         aria-label="이미지 ${idx + 1} 크게 보기"
       >
         <img
-          src="${img.thumb || img.url}"
+          src="${thumbSrc}"
           alt="${escapeHtml(img.name || (event.title + ' ' + (idx + 1)))}"
           loading="lazy"
         >
@@ -275,7 +278,7 @@ function updateLightboxImage() {
   var image   = galleryImages[lightboxIndex];
 
   if (img) {
-    img.src = image.url;
+    img.src = driveToImg(image.url, true); // 라이트박스: 원본 화질
     img.alt = image.name || ('Image ' + (lightboxIndex + 1));
   }
   if (counter) {

@@ -310,7 +310,7 @@ function renderSettingsBrand() {
           field('보조 버튼 텍스트', inp('hero-ctaSecondary', h.ctaSecondary))) +
       field('히어로 이미지 URL',
         '<div class="img-preview-row">' +
-        '<img class="img-preview" id="hero-img-preview" src="' + esc(h.image || '') + '" alt="">' +
+        '<img class="img-preview" id="hero-img-preview" src="' + esc(driveToImg(h.image || '')) + '" alt="">' +
         inp('hero-image', h.image) +
         '</div>' +
         '<p class="admin-hint">직접 URL 또는 Google Drive 공유 이미지 링크 (https://drive.google.com/uc?export=view&amp;id=FILE_ID)</p>'
@@ -339,7 +339,7 @@ function bindSettingsBrand() {
   liveInput('hero-image',        function(v){
     S.config.hero.image = v;
     var prev = document.getElementById('hero-img-preview');
-    if (prev) prev.src = v;
+    if (prev) prev.src = driveToImg(v);
   });
   liveInput('hero-captionTitle', function(v){ S.config.hero.captionTitle = v; });
   liveInput('hero-captionText',  function(v){ S.config.hero.captionText = v; });
@@ -518,7 +518,7 @@ function renderEventsView() {
     return (
       '<div class="event-admin-card">' +
         '<div class="event-admin-card__thumb">' +
-          '<img src="' + esc(ev.coverImage || '') + '" alt="' + esc(ev.title) + '" loading="lazy">' +
+          '<img src="' + esc(driveToImg(ev.coverImage || '')) + '" alt="' + esc(ev.title) + '" loading="lazy">' +
         '</div>' +
         '<div class="event-admin-card__body">' +
           '<div class="event-admin-card__badges">' +
@@ -617,7 +617,7 @@ function renderEventEditView() {
   var imgList = (_editEv.images || []).map(function(url, i) {
     return (
       '<div class="image-list__item">' +
-        '<img src="' + esc(url) + '" alt="">' +
+        '<img src="' + esc(driveToImg(url)) + '" alt="">' +
         '<button class="image-list__remove img-remove" data-idx="' + i + '" aria-label="삭제">×</button>' +
       '</div>'
     );
@@ -648,7 +648,7 @@ function renderEventEditView() {
     card('대표 이미지', true,
       field('커버 이미지 URL',
         '<div class="img-preview-row">' +
-          '<img class="img-preview" id="cover-preview" src="' + esc(_editEv.coverImage || '') + '" alt="">' +
+          '<img class="img-preview" id="cover-preview" src="' + esc(driveToImg(_editEv.coverImage || '')) + '" alt="">' +
           inp('ev-coverImage', _editEv.coverImage) +
         '</div>'
       )
@@ -715,7 +715,7 @@ function bindEventEditView() {
   on('ev-coverImage', 'input', function() {
     var src = document.getElementById('ev-coverImage').value;
     var prev = document.getElementById('cover-preview');
-    if (prev) prev.src = src;
+    if (prev) prev.src = driveToImg(src);
   });
 
   // Image list: remove
@@ -749,7 +749,7 @@ function refreshImageList() {
   listEl.innerHTML = (_editEv.images || []).map(function(url, i) {
     return (
       '<div class="image-list__item">' +
-        '<img src="' + esc(url) + '" alt="">' +
+        '<img src="' + esc(driveToImg(url)) + '" alt="">' +
         '<button class="image-list__remove img-remove" data-idx="' + i + '" aria-label="삭제">×</button>' +
       '</div>'
     );
@@ -917,6 +917,23 @@ function toggle(id, checked, label) {
       '<label class="admin-toggle-label" for="' + id + '">' + label + '</label>' +
     '</div>'
   );
+}
+
+/**
+ * Google Drive 공유 링크 → <img> 직접 사용 가능한 URL로 변환
+ * (components.js와 동일 로직 — admin.js는 독립 로드)
+ */
+function driveToImg(url, fullSize) {
+  if (!url) return '';
+  var m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+          url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m) {
+    var id = m[1];
+    return fullSize
+      ? 'https://drive.google.com/uc?export=view&id=' + id
+      : 'https://lh3.googleusercontent.com/d/' + id;
+  }
+  return url;
 }
 
 function esc(str) {
