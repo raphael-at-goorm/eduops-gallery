@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prestige Events — Premium Event Gallery</title>
-  <meta name="description" content="Discover our curated collection of premium event galleries. From galas to conferences, explore the moments that make each occasion unforgettable.">
+  <meta name="description" content="Discover our curated collection of premium event galleries.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -12,43 +12,28 @@
 </head>
 <body>
 
-  <!-- Header (injected by JS) -->
   <div id="site-header"></div>
 
   <main>
 
-    <!-- ═══════════════════════════════════════════
-         Hero Section
-    ═══════════════════════════════════════════ -->
+    <!-- Hero -->
     <section class="hero" aria-labelledby="hero-title">
       <div class="container hero__inner">
 
-        <!-- Left: Content -->
         <div class="hero__content">
           <div class="hero__label">
             <span class="hero__label-dot" aria-hidden="true"></span>
-            Premium Event Gallery
+            <span id="hero-label">Premium Event Gallery</span>
           </div>
-
-          <h1 class="hero__title" id="hero-title">
-            Moments That<br>Define Excellence
-          </h1>
-
-          <p class="hero__description">
+          <h1 class="hero__title" id="hero-title">Moments That<br>Define Excellence</h1>
+          <p class="hero__description" id="hero-description">
             Discover our curated collection of premium event galleries.
-            From galas to conferences, explore the moments that make
-            each occasion unforgettable.
+            From galas to conferences, explore the moments that make each occasion unforgettable.
           </p>
-
           <div class="hero__actions">
-            <a href="events.html" class="btn btn--primary">
-              Explore All Events <span aria-hidden="true">→</span>
-            </a>
-            <a href="#featured" class="btn btn--ghost">
-              View Featured
-            </a>
+            <a href="events.html" class="btn btn--primary" id="hero-cta-primary">Explore All Events →</a>
+            <a href="#featured" class="btn btn--ghost" id="hero-cta-secondary">View Featured</a>
           </div>
-
           <div class="hero__stats" aria-label="통계">
             <div class="hero__stat">
               <span class="hero__stat-value" id="stat-events">6+</span>
@@ -67,22 +52,15 @@
           </div>
         </div>
 
-        <!-- Right: Visual -->
         <div class="hero__visual" aria-hidden="true">
           <div class="hero__image-card">
-            <img
-              src="https://picsum.photos/seed/prestige-hero/600/750"
-              alt="Premium event photography"
-              loading="eager"
-            >
+            <img id="hero-image" src="https://picsum.photos/seed/prestige-hero/600/750" alt="Premium event photography" loading="eager">
           </div>
           <div class="hero__caption-card">
-            <span class="hero__caption-icon" aria-hidden="true">◈</span>
+            <span class="hero__caption-icon">◈</span>
             <div>
-              <div class="hero__caption-title">Gallery Archive</div>
-              <div class="hero__caption-text">
-                High quality event photography and curated moments
-              </div>
+              <div class="hero__caption-title" id="hero-caption-title">Gallery Archive</div>
+              <div class="hero__caption-text" id="hero-caption-text">High quality event photography and curated moments</div>
             </div>
           </div>
         </div>
@@ -90,72 +68,47 @@
       </div>
     </section>
 
-
-    <!-- ═══════════════════════════════════════════
-         Featured Events Section
-    ═══════════════════════════════════════════ -->
+    <!-- Featured Events -->
     <section class="section" id="featured" aria-labelledby="featured-title">
       <div class="container">
-
         <div class="section__header">
           <div>
             <h2 class="section__title" id="featured-title">Featured Events</h2>
-            <p class="section__subtitle">Highlighted moments from our premium collection</p>
+            <p class="section__subtitle" id="featured-subtitle">Highlighted moments from our premium collection</p>
           </div>
-          <a href="events.html" class="section__link" aria-label="모든 이벤트 보기">
-            View All <span aria-hidden="true">→</span>
-          </a>
+          <a href="events.html" class="section__link" id="featured-viewall">View All <span aria-hidden="true">→</span></a>
         </div>
-
-        <!-- Populated by main.js -->
         <div id="featured-events"></div>
-
       </div>
     </section>
 
-
-    <!-- ═══════════════════════════════════════════
-         Recent Events Section
-    ═══════════════════════════════════════════ -->
+    <!-- Recent Events -->
     <section class="section" style="background:var(--color-surface);padding-top:0;" aria-labelledby="recent-title">
       <div class="container" style="padding-top:var(--space-20);">
-
         <div class="section__header">
           <div>
             <h2 class="section__title" id="recent-title">Recent Events</h2>
-            <p class="section__subtitle">Latest additions to our gallery collection</p>
+            <p class="section__subtitle" id="recent-subtitle">Latest additions to our gallery collection</p>
           </div>
-          <a href="events.html" class="section__link" aria-label="모든 이벤트 보기">
-            Browse All Events <span aria-hidden="true">→</span>
-          </a>
+          <a href="events.html" class="section__link" id="recent-browseall">Browse All Events <span aria-hidden="true">→</span></a>
         </div>
-
-        <!-- Populated by main.js -->
         <div id="recent-events" class="events-grid events-grid--4"></div>
-
       </div>
     </section>
 
-
-    <!-- ═══════════════════════════════════════════
-         CTA Band
-    ═══════════════════════════════════════════ -->
+    <!-- CTA Band -->
     <section class="cta-band" aria-labelledby="cta-title">
       <div class="cta-band__inner">
         <h2 class="cta-band__title" id="cta-title">Experience Premium Events</h2>
-        <p class="cta-band__text">
-          Each event is carefully documented to preserve the atmosphere,
-          energy, and special moments that make our gatherings unforgettable.
+        <p class="cta-band__text" id="cta-text">
+          Each event is carefully documented to preserve the atmosphere, energy, and special moments that make our gatherings unforgettable.
         </p>
-        <a href="events.html" class="btn btn--outline-white">
-          Explore Event Galleries <span aria-hidden="true">→</span>
-        </a>
+        <a href="events.html" class="btn btn--outline-white" id="cta-button">Explore Event Galleries →</a>
       </div>
     </section>
 
   </main>
 
-  <!-- Footer (injected by JS) -->
   <div id="site-footer"></div>
 
   <script src="js/config.js"></script>
