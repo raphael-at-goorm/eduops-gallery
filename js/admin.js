@@ -848,15 +848,40 @@ async function deployChanges() {
     var configContent = generateConfigJs(S.config);
     var dataContent   = generateDataJs(S.events);
 
-    var msg = 'Update via Admin Panel';
+    // ── Git Trees API: 두 파일을 단일 커밋으로 묶어 Pages 빌드가 한 번만 트리거되도록 함 ──
 
-    // Commit config.js
-    var cfgRes = await ghPut('contents/js/config.js', configContent, S.configSha, msg + ': site config');
-    S.configSha = cfgRes.content.sha;
+    // 1) 현재 브랜치의 HEAD SHA
+    var refData = await ghApiGet('git/refs/heads/' + S.branch);
+    var headSha = refData.object.sha;
 
-    // Commit data.js
-    var dataRes = await ghPut('contents/js/data.js', dataContent, S.dataSha, msg + ': event data');
-    S.dataSha = dataRes.content.sha;
+    // 2) HEAD 커밋의 tree SHA
+    var headCommit = await ghApiGet('git/commits/' + headSha);
+    var baseTree   = headCommit.tree.sha;
+
+    // 3) 새 tree 생성 (config.js + data.js 동시 포함)
+    var newTree = await ghApiPost('git/trees', {
+      base_tree: baseTree,
+      tree: [
+        { path: 'js/config.js', mode: '100644', type: 'blob', content: configContent },
+        { path: 'js/data.js',   mode: '100644', type: 'blob', content: dataContent  }
+      ]
+    });
+
+    // 4) 새 커밋 생성
+    var newCommit = await ghApiPost('git/commits', {
+      message: 'Update via Admin Panel',
+      tree:    newTree.sha,
+      parents: [headSha]
+    });
+
+    // 5) 브랜치 ref 업데이트
+    await ghApiPatch('git/refs/heads/' + S.branch, { sha: newCommit.sha });
+
+    // 6) 로컬 SHA 갱신 (Contents API로 각 파일 SHA 재조회)
+    var cfgFile  = await ghGet('contents/js/config.js');
+    var dataFile = await ghGet('contents/js/data.js');
+    S.configSha = cfgFile.sha;
+    S.dataSha   = dataFile.sha;
 
     markClean();
     hideLoading();
@@ -869,6 +894,36 @@ async function deployChanges() {
     btn.disabled = !S.dirty;
     btn.textContent = '▲ 배포하기';
   }
+}
+
+/* Git Data API helpers */
+async function ghApiGet(path) {
+  var res = await fetch(apiUrl(path), { headers: apiHeaders() });
+  var data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'HTTP ' + res.status);
+  return data;
+}
+
+async function ghApiPost(path, body) {
+  var res = await fetch(apiUrl(path), {
+    method:  'POST',
+    headers: apiHeaders(),
+    body:    JSON.stringify(body)
+  });
+  var data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'HTTP ' + res.status);
+  return data;
+}
+
+async function ghApiPatch(path, body) {
+  var res = await fetch(apiUrl(path), {
+    method:  'PATCH',
+    headers: apiHeaders(),
+    body:    JSON.stringify(body)
+  });
+  var data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'HTTP ' + res.status);
+  return data;
 }
 
 /* ══════════════════════════════════════════════════════════
