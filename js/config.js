@@ -12,11 +12,11 @@ const SITE_CONFIG = {
   },
   "hero": {
     "label": "goorm DEEP DIVE",
-    "title": "A New Dimension\\nof Immersion",
+    "title": "A New Dimension of Immersion",
     "description": "Explore a curated archive of photographs capturing the moments, atmosphere, and connections that define the goorm DEEP DIVE experience.",
     "ctaPrimary": "Explore All Events →",
     "ctaSecondary": "View Featured",
-    "image": "https://picsum.photos/seed/prestige-hero/600/750",
+    "image": "https://drive.google.com/file/d/1xjxM_n8CbBNxmVMjsW-r-6yF06zWh5kr/view?usp=sharing",
     "captionTitle": "DEEP DIVE Moments",
     "captionText": "Scenes, energy, and connections from goorm DEEP DIVE events."
   },
