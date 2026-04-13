@@ -60,16 +60,8 @@ const SITE_CONFIG = {
   ],
   "social": [
     {
-      "label": "Instagram",
-      "url": "#"
-    },
-    {
-      "label": "Twitter",
-      "url": "#"
-    },
-    {
-      "label": "LinkedIn",
-      "url": "#"
+      "label": "Youtube",
+      "url": "https://www.youtube.com/@goorm"
     }
   ]
 };
