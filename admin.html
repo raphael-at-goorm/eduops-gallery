@@ -17,44 +17,60 @@
       <div class="auth-card__logo">
         <div class="auth-card__logo-mark">PE</div>
         <div>
-          <span class="auth-card__logo-name">Prestige Events</span>
+          <span class="auth-card__logo-name">DEEPDIVE Events</span>
           <span class="auth-card__logo-sub">Admin Panel</span>
         </div>
       </div>
-      <h2>Sign In</h2>
-      <p class="auth-card__sub">
-        GitHub Personal Access Token으로 로그인합니다.<br>
-        토큰은 이 브라우저에만 저장되며 서버로 전송되지 않습니다.
-      </p>
+      <h2>관리자 로그인</h2>
+      <p class="auth-card__sub">PIN을 입력하세요.</p>
       <div id="auth-error" class="auth-error"></div>
       <div class="admin-field">
-        <label class="admin-label" for="auth-token">GitHub Personal Access Token</label>
+        <label class="admin-label" for="auth-pin">PIN</label>
         <input
-          id="auth-token"
+          id="auth-pin"
           type="password"
           class="admin-input"
-          placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+          placeholder="••••••••"
           autocomplete="off"
           spellcheck="false"
         >
-        <p class="admin-hint">
-          <a href="https://github.com/settings/tokens/new?scopes=repo&description=eduops-gallery-admin" target="_blank" rel="noopener" style="color:#2563EB;">토큰 발급하기 →</a>
-          &nbsp;(repo 스코프 선택)
+      </div>
+
+      <!-- 초기 설정 — 저장된 토큰이 없을 때만 표시 -->
+      <div id="auth-setup" style="display:none;">
+        <p class="auth-card__sub" style="margin-top:16px;border-top:1px solid var(--color-border);padding-top:16px;">
+          처음 설정: GitHub Token과 레포지토리를 입력하면 이 브라우저에 저장됩니다.
         </p>
+        <div class="admin-field">
+          <label class="admin-label" for="auth-token">GitHub Personal Access Token</label>
+          <input
+            id="auth-token"
+            type="password"
+            class="admin-input"
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <p class="admin-hint">
+            <a href="https://github.com/settings/tokens/new?scopes=repo&description=eduops-gallery-admin" target="_blank" rel="noopener" style="color:#2563EB;">토큰 발급하기 →</a>
+            &nbsp;(repo 스코프 선택)
+          </p>
+        </div>
+        <div class="admin-field">
+          <label class="admin-label" for="auth-repo">
+            Repository <span>(기본값: URL에서 자동 감지)</span>
+          </label>
+          <input
+            id="auth-repo"
+            type="text"
+            class="admin-input"
+            placeholder="owner/repo-name"
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
       </div>
-      <div class="admin-field">
-        <label class="admin-label" for="auth-repo">
-          Repository <span>(기본값: URL에서 자동 감지)</span>
-        </label>
-        <input
-          id="auth-repo"
-          type="text"
-          class="admin-input"
-          placeholder="owner/repo-name"
-          autocomplete="off"
-          spellcheck="false"
-        >
-      </div>
+
       <button id="auth-submit" class="btn-admin btn-admin--primary" style="width:100%;justify-content:center;margin-top:8px;">
         로그인
       </button>

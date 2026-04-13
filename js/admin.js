@@ -4,6 +4,12 @@
  */
 
 /* ══════════════════════════════════════════════════════════
+   0. Constants
+══════════════════════════════════════════════════════════ */
+
+var ADMIN_PIN = 'hiddensinger8!';
+
+/* ══════════════════════════════════════════════════════════
    1. State
 ══════════════════════════════════════════════════════════ */
 
@@ -124,10 +130,10 @@ function generateDataJs(events) {
 ══════════════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', function() {
-  prefillAuthForm();
+  setupAuthScreen();
 
   document.getElementById('auth-submit').addEventListener('click', handleLogin);
-  document.getElementById('auth-token').addEventListener('keydown', function(e) {
+  document.getElementById('auth-pin').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') handleLogin();
   });
   document.getElementById('btn-logout').addEventListener('click', handleLogout);
@@ -136,7 +142,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Sidebar nav
   document.querySelectorAll('.sidebar-nav-item[data-view]').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      // If editing, confirm discard if dirty
       if ((S.view === 'event-edit') && S.editDirty) {
         if (!confirm('이벤트 편집 중 변경사항이 있습니다. 돌아가시겠습니까?')) return;
       }
@@ -144,24 +149,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Try auto-login from localStorage
-  var savedToken = localStorage.getItem('admin_token');
-  var savedRepo  = localStorage.getItem('admin_repo');
-  if (savedToken && savedRepo) {
-    var parts = savedRepo.split('/');
-    if (parts.length === 2) {
-      S.token = savedToken;
-      S.owner = parts[0];
-      S.repo  = parts[1];
-      loadData();
-      return;
-    }
-  }
-
   showAuthScreen();
 });
 
-function prefillAuthForm() {
+function setupAuthScreen() {
+  var savedToken = localStorage.getItem('admin_token');
+  var savedRepo  = localStorage.getItem('admin_repo');
+  var setupEl = document.getElementById('auth-setup');
+
+  if (!savedToken || !savedRepo) {
+    // First time: show token + repo fields
+    if (setupEl) setupEl.style.display = 'block';
+    prefillRepoField();
+  }
+  // Focus PIN field
+  setTimeout(function() {
+    var pin = document.getElementById('auth-pin');
+    if (pin) pin.focus();
+  }, 50);
+}
+
+function prefillRepoField() {
+  var repoEl = document.getElementById('auth-repo');
+  if (!repoEl) return;
   // Auto-detect repo from GitHub Pages URL
   var hostname = window.location.hostname;
   var pathname = window.location.pathname;
@@ -169,22 +179,49 @@ function prefillAuthForm() {
     var owner = hostname.replace('.github.io', '');
     var pathParts = pathname.split('/').filter(Boolean);
     if (owner && pathParts.length > 0) {
-      document.getElementById('auth-repo').value = owner + '/' + pathParts[0];
+      repoEl.value = owner + '/' + pathParts[0];
     }
   }
-
-  // Prefill saved repo
   var savedRepo = localStorage.getItem('admin_repo');
-  if (savedRepo) document.getElementById('auth-repo').value = savedRepo;
+  if (savedRepo) repoEl.value = savedRepo;
 }
 
 async function handleLogin() {
-  var token  = document.getElementById('auth-token').value.trim();
-  var repoRaw = document.getElementById('auth-repo').value.trim();
-  var parts  = repoRaw.split('/');
-
   var errEl = document.getElementById('auth-error');
   errEl.classList.remove('is-visible');
+
+  var pin = document.getElementById('auth-pin').value;
+  if (pin !== ADMIN_PIN) {
+    errEl.textContent = 'PIN이 올바르지 않습니다.';
+    errEl.classList.add('is-visible');
+    return;
+  }
+
+  var savedToken = localStorage.getItem('admin_token');
+  var savedRepo  = localStorage.getItem('admin_repo');
+
+  if (savedToken && savedRepo) {
+    var parts = savedRepo.split('/');
+    if (parts.length === 2) {
+      S.token = savedToken;
+      S.owner = parts[0];
+      S.repo  = parts[1];
+      try { await loadData(); }
+      catch(e) {
+        errEl.textContent = '데이터 로드 실패: ' + e.message;
+        errEl.classList.add('is-visible');
+        S.token = S.owner = S.repo = '';
+      }
+      return;
+    }
+  }
+
+  // First time: need token + repo
+  var tokenEl  = document.getElementById('auth-token');
+  var repoEl   = document.getElementById('auth-repo');
+  var token    = tokenEl ? tokenEl.value.trim() : '';
+  var repoRaw  = repoEl  ? repoEl.value.trim()  : '';
+  var parts    = repoRaw.split('/');
 
   if (!token) {
     errEl.textContent = 'GitHub Token을 입력해주세요.';
@@ -300,7 +337,14 @@ function renderSettingsBrand() {
       row(field('사이트 이름', inp('brand-name', b.name)),
           field('태그라인',    inp('brand-tagline', b.tagline))) +
       field('사이트 설명', textarea('brand-description', b.description)) +
-      field('연도', inp('brand-year', b.year, 'text', '2025'))
+      field('연도', inp('brand-year', b.year, 'text', '2025')) +
+      field('로고 이미지 URL <span>(설정 시 텍스트 로고 대신 이미지 표시)</span>',
+        '<div class="img-preview-row">' +
+        '<img class="img-preview img-preview--logo" id="logo-img-preview" src="' + esc(driveToImg(b.logoUrl || '')) + '" alt=""' + (b.logoUrl ? '' : ' style="display:none"') + '>' +
+        inp('brand-logoUrl', b.logoUrl) +
+        '</div>' +
+        '<p class="admin-hint">직접 URL 또는 Google Drive 공유 링크. 비워두면 텍스트 로고("PE")가 표시됩니다.</p>'
+      )
     ) +
     card('히어로 섹션', true,
       field('라벨 텍스트 <span>(히어로 상단 소형 태그)</span>', inp('hero-label', h.label)) +
@@ -331,6 +375,15 @@ function bindSettingsBrand() {
   liveInput('brand-tagline',     function(v){ S.config.brand.tagline = v; });
   liveInput('brand-description', function(v){ S.config.brand.description = v; });
   liveInput('brand-year',        function(v){ S.config.brand.year = v; });
+  liveInput('brand-logoUrl',     function(v){
+    S.config.brand.logoUrl = v;
+    var prev = document.getElementById('logo-img-preview');
+    if (prev) {
+      var converted = driveToImg(v);
+      prev.src = converted;
+      prev.style.display = converted ? '' : 'none';
+    }
+  });
   liveInput('hero-label',        function(v){ S.config.hero.label = v; });
   liveInput('hero-title',        function(v){ S.config.hero.title = v; });
   liveInput('hero-description',  function(v){ S.config.hero.description = v; });
@@ -646,11 +699,12 @@ function renderEventEditView() {
     ) +
 
     card('대표 이미지', true,
-      field('커버 이미지 URL',
+      field('커버 이미지 URL <span>(Google Drive 공유 링크 또는 직접 URL)</span>',
         '<div class="img-preview-row">' +
           '<img class="img-preview" id="cover-preview" src="' + esc(driveToImg(_editEv.coverImage || '')) + '" alt="">' +
           inp('ev-coverImage', _editEv.coverImage) +
-        '</div>'
+        '</div>' +
+        '<p class="admin-hint">Google Drive 파일 공유 링크(https://drive.google.com/file/d/…/view)를 그대로 붙여넣으면 자동 변환됩니다.</p>'
       )
     ) +
 
@@ -666,7 +720,8 @@ function renderEventEditView() {
         '<input id="ev-driveUrl" class="admin-input" value="' + esc(_editEv.driveFolderUrl || '') + '" placeholder="https://drive.google.com/drive/folders/…">' +
         '<p class="admin-hint">폴더를 "링크가 있는 모든 사용자 — 뷰어"로 공유 후 URL 입력. API 키 설정 시 자동 로드됩니다.</p>'
       ) +
-      '<div class="admin-label" style="margin-bottom:8px;">직접 이미지 URL 목록 <span>(Drive 미설정 시 사용)</span></div>' +
+      '<div class="admin-label" style="margin-bottom:8px;">갤러리 이미지 URL 목록 <span>(Drive 폴더 미설정 시 / API 키 없을 때 사용)</span></div>' +
+      '<p class="admin-hint" style="margin-bottom:8px;">Google Drive 파일 공유 링크(https://drive.google.com/file/d/…/view)를 직접 추가할 수 있습니다.</p>' +
       '<div class="image-list" id="image-list">' + imgList + '</div>' +
       '<div class="image-add-row">' +
         '<input id="img-url-input" class="admin-input" placeholder="https://… 이미지 URL">' +

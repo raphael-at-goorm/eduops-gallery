@@ -517,6 +517,16 @@ h1,h2,h3,h4 { font-family: var(--font-display); line-height: 1.2; }
   background: var(--color-bg);
 }
 
+/* Logo preview — wider, preserve aspect ratio */
+.img-preview--logo {
+  width: auto;
+  max-width: 160px;
+  height: 44px;
+  object-fit: contain;
+  background: var(--color-bg-secondary);
+  padding: 4px 8px;
+}
+
 .img-preview-row {
   display: flex;
   align-items: center;

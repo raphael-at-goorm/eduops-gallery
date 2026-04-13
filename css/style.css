@@ -179,6 +179,22 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1;
 }
 
+/* 로고 이미지 — 헤더 세로 높이에 맞춰 자동 리사이즈 */
+.header__logo-img {
+  height: calc(var(--header-height) - 28px);
+  max-height: 40px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .header__logo-img {
+    height: calc(var(--header-height) - 24px);
+    max-height: 36px;
+  }
+}
+
 .header__nav {
   display: flex;
   align-items: center;
@@ -766,6 +782,15 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-dark-text-sec);
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* 로고 이미지 — 푸터 */
+.footer__logo-img {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  filter: brightness(0) invert(1); /* 어두운 배경에서 흰색으로 반전 */
 }
 
 .footer__description {

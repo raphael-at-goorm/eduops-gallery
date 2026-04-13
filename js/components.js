@@ -160,15 +160,18 @@ function renderEmptyState(message) {
  */
 function renderHeader(activePage) {
   const brand = SITE_CONFIG.brand;
+  const logoInner = brand.logoUrl
+    ? `<img src="${driveToImg(brand.logoUrl)}" alt="${escapeHtml(brand.name)}" class="header__logo-img">`
+    : `<span class="header__logo-mark" aria-hidden="true">PE</span>
+          <div>
+            <span class="header__logo-name">${escapeHtml(brand.name)}</span>
+            <span class="header__logo-sub">${escapeHtml(brand.tagline)}</span>
+          </div>`;
   return `
     <header class="header" role="banner">
       <div class="container header__inner">
         <a href="index.html" class="header__logo" aria-label="${brand.name} 홈">
-          <span class="header__logo-mark" aria-hidden="true">PE</span>
-          <div>
-            <span class="header__logo-name">${escapeHtml(brand.name)}</span>
-            <span class="header__logo-sub">${escapeHtml(brand.tagline)}</span>
-          </div>
+          ${logoInner}
         </a>
         <nav class="header__nav" aria-label="주요 메뉴">
           <a href="index.html"  class="header__nav-link${activePage === 'home'   ? ' is-active' : ''}">Home</a>
@@ -199,11 +202,13 @@ function renderFooter() {
       <div class="container footer__inner">
         <div class="footer__brand">
           <a href="index.html" class="footer__logo" aria-label="${brand.name} 홈">
-            <span class="footer__logo-mark" aria-hidden="true">PE</span>
+            ${brand.logoUrl
+              ? `<img src="${driveToImg(brand.logoUrl)}" alt="${escapeHtml(brand.name)}" class="footer__logo-img">`
+              : `<span class="footer__logo-mark" aria-hidden="true">PE</span>
             <div>
               <span class="footer__logo-name">${escapeHtml(brand.name)}</span>
               <span class="footer__logo-sub">${escapeHtml(brand.tagline)}</span>
-            </div>
+            </div>`}
           </a>
           <p class="footer__description">${escapeHtml(brand.description)}</p>
         </div>

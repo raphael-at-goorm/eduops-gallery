@@ -8,7 +8,8 @@ const SITE_CONFIG = {
     "name": "DEEPDIVE Events",
     "tagline": "Gallery",
     "description": "구름 딥다이브의 이벤트를 생생하게 느낄 수 있는 사진 갤러리입니다",
-    "year": "2026"
+    "year": "2026",
+    "logoUrl": ""
   },
   "hero": {
     "label": "goorm DEEP DIVE",
