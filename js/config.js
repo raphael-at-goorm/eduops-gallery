@@ -42,10 +42,6 @@ const SITE_CONFIG = {
   },
   "footerCategories": [
     {
-      "label": "Gala",
-      "value": "Gala"
-    },
-    {
       "label": "Conferences",
       "value": "Conference"
     },
@@ -54,8 +50,12 @@ const SITE_CONFIG = {
       "value": "Festival"
     },
     {
-      "label": "Product Launches",
-      "value": "Launch"
+      "label": "Hackathon",
+      "value": "Hackathon"
+    },
+    {
+      "label": "Job Concert",
+      "value": "Job Concert"
     }
   ],
   "social": [
