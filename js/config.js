@@ -9,7 +9,7 @@ const SITE_CONFIG = {
     "tagline": "Gallery",
     "description": "구름 딥다이브의 이벤트를 생생하게 느낄 수 있는 사진 갤러리입니다",
     "year": "2026",
-    "logoUrl": ""
+    "logoUrl": "https://drive.google.com/file/d/17Rds0QRCgpEmWtV7sDy_J2DWZrygpBF4/view?usp=sharing"
   },
   "hero": {
     "label": "goorm DEEP DIVE",
