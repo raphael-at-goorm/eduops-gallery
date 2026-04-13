@@ -17,7 +17,7 @@ const SITE_CONFIG = {
     "description": "Explore a curated archive of photographs capturing the moments, atmosphere, and connections that define the goorm DEEP DIVE experience.",
     "ctaPrimary": "Explore All Events →",
     "ctaSecondary": "View Featured",
-    "image": "https://drive.google.com/file/d/1xjxM_n8CbBNxmVMjsW-r-6yF06zWh5kr",
+    "image": "https://drive.google.com/file/d/1xjxM_n8CbBNxmVMjsW-r-6yF06zWh5kr/view?usp=drive_link",
     "captionTitle": "DEEP DIVE Moments",
     "captionText": "Scenes, energy, and connections from goorm DEEP DIVE events."
   },
