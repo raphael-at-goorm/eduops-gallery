@@ -122,17 +122,34 @@ async function loadGallery(event) {
   /* Show skeleton while loading */
   section.innerHTML = buildSkeletonHtml();
 
-  try {
-    galleryImages = await resolveEventImages(event);
-  } catch (err) {
-    console.error('[Gallery] Failed to load images:', err);
+  var driveError = null;
+  var folderId   = extractDriveFolderId(event.driveFolderUrl);
+
+  /* Try Drive folder API first */
+  if (folderId && SITE_CONFIG.googleDrive.apiKey) {
+    try {
+      galleryImages = await fetchDriveImages(folderId);
+    } catch (err) {
+      console.warn('[Drive] API 오류:', err.message);
+      driveError    = err.message;
+      galleryImages = [];
+    }
+  }
+
+  /* Fallback: manual images[] array */
+  if (!galleryImages || galleryImages.length === 0) {
     galleryImages = (event.images || []).map(function (url) {
       return { url: url, thumb: url, name: '' };
     });
+    if (driveError && galleryImages.length === 0) {
+      /* Keep driveError so the empty-state can show it */
+    } else {
+      driveError = null; /* images[] worked fine, suppress Drive error */
+    }
   }
 
   if (galleryImages.length === 0) {
-    section.innerHTML = buildEmptyGalleryHtml(event);
+    section.innerHTML = buildEmptyGalleryHtml(event, driveError);
     return;
   }
 
@@ -155,13 +172,20 @@ function buildSkeletonHtml() {
   `;
 }
 
-function buildEmptyGalleryHtml(event) {
+function buildEmptyGalleryHtml(event, driveError) {
   var hasFolder = event.driveFolderUrl && event.driveFolderUrl.trim() !== '';
   var hasApiKey = SITE_CONFIG.googleDrive.apiKey && SITE_CONFIG.googleDrive.apiKey.trim() !== '';
 
-  var msg = hasFolder && !hasApiKey
-    ? '<strong>Google Drive API key required</strong>config.js 에서 googleDrive.apiKey 를 설정하면 폴더 이미지가 자동으로 표시됩니다.'
-    : '<strong>No images yet</strong>data.js 의 images[] 배열에 이미지 URL을 추가하거나, driveFolderUrl 에 Google Drive 폴더 주소를 입력하세요.';
+  var msg;
+  if (driveError) {
+    msg = '<strong>Google Drive API 오류</strong> — ' + escapeHtml(driveError) +
+          '<br><span style="font-size:12px;opacity:.7;">Google Cloud Console에서 Drive API 활성화 여부 및 API 키의 HTTP 참조자 제한을 확인하세요.' +
+          ' 폴더와 파일이 <em>링크가 있는 모든 사용자 — 뷰어</em>로 공유되어 있어야 합니다.</span>';
+  } else if (hasFolder && !hasApiKey) {
+    msg = '<strong>Google Drive API key 필요</strong> — 어드민 › 연동 설정에서 googleDrive.apiKey 를 설정하면 폴더 이미지가 자동으로 표시됩니다.';
+  } else {
+    msg = '<strong>이미지가 없습니다</strong> — 어드민에서 이벤트의 images[] 배열에 이미지 URL을 추가하거나, Drive 폴더 URL을 입력하세요.';
+  }
 
   return `
     <div class="container">
