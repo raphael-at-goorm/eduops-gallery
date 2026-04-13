@@ -38,7 +38,7 @@ const SITE_CONFIG = {
     "ctaButton": "Explore Event Galleries →"
   },
   "googleDrive": {
-    "apiKey": ""
+    "apiKey": "AIzaSyC66hx3nENh1WSC-ALbr1_eWlS_5OJ7HiM"
   },
   "footerCategories": [
     {
