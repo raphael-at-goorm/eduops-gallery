@@ -271,25 +271,41 @@ function extractDriveFolderId(url) {
 }
 
 /**
- * Fetch image list from a public Google Drive folder
- * Requires SITE_CONFIG.googleDrive.apiKey to be set
+ * Fetch image list from a Google Drive folder.
+ * Apps Script URL 우선 → Drive API 키 순으로 시도.
  * @param {string} folderId
  * @returns {Promise<Array<{url: string, thumb: string, name: string}>>}
  */
 async function fetchDriveImages(folderId) {
-  const apiKey = SITE_CONFIG.googleDrive.apiKey;
+  const gd        = SITE_CONFIG.googleDrive || {};
+  const scriptUrl = gd.appsScriptUrl && gd.appsScriptUrl.trim();
+  const apiKey    = gd.apiKey && gd.apiKey.trim();
+
+  /* ── 방법 1: Apps Script URL ────────────────────────── */
+  if (scriptUrl) {
+    const res  = await fetch(scriptUrl + '?folderId=' + encodeURIComponent(folderId));
+    if (!res.ok) throw new Error('Apps Script HTTP ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error('Apps Script: ' + data.error);
+    return (data.files || []).map(f => ({
+      url:   `https://lh3.googleusercontent.com/d/${f.id}`,
+      thumb: `https://lh3.googleusercontent.com/d/${f.id}`,
+      name:  f.name
+    }));
+  }
+
+  /* ── 방법 2: Drive API 키 ───────────────────────────── */
   if (!apiKey) throw new Error('Google Drive API key not configured');
 
-  const q      = encodeURIComponent(`'${folderId}' in parents and mimeType contains 'image/' and trashed = false`);
-  const fields = encodeURIComponent('files(id,name)');
-  const endpoint = `https://www.googleapis.com/drive/v3/files?q=${q}&key=${apiKey}&fields=${fields}&pageSize=100&orderBy=name`;
+  const q        = encodeURIComponent(`'${folderId}' in parents and mimeType contains 'image/' and trashed = false`);
+  const fields   = encodeURIComponent('files(id,name)');
+  const endpoint = `https://www.googleapis.com/drive/v3/files?q=${q}&key=${apiKey}&fields=${fields}&pageSize=200&orderBy=name`;
 
   const res = await fetch(endpoint);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error?.message || `Drive API error ${res.status}`);
   }
-
   const data = await res.json();
   return (data.files || []).map(file => ({
     url:   `https://lh3.googleusercontent.com/d/${file.id}`,

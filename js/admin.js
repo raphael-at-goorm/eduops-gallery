@@ -279,7 +279,8 @@ async function loadData() {
     S.config.hero     = S.config.hero     || {};
     S.config.stats    = S.config.stats    || {};
     S.config.sections = S.config.sections || {};
-    S.config.googleDrive    = S.config.googleDrive    || { apiKey: '' };
+    S.config.googleDrive    = S.config.googleDrive    || { apiKey: '', appsScriptUrl: '' };
+    S.config.googleDrive.appsScriptUrl = S.config.googleDrive.appsScriptUrl || '';
     S.config.footerCategories = S.config.footerCategories || [];
     S.config.social   = S.config.social   || [];
 
@@ -546,19 +547,72 @@ function refreshFooterView() {
 
 function renderSettingsIntegrations() {
   var gd = S.config.googleDrive || {};
-  return card('Google Drive 연동', true,
-    field('API 키',
-      '<input id="drive-apikey" type="password" class="admin-input" value="' + esc(gd.apiKey || '') + '" placeholder="AIzaSy…" autocomplete="off">' +
-      '<p class="admin-hint">' +
-        '<a href="https://console.cloud.google.com/" target="_blank" rel="noopener" style="color:#2563EB;">Google Cloud Console</a>에서 Drive API를 활성화하고 API 키를 발급하세요.' +
-        '<br>각 이벤트의 <strong>Drive 폴더 URL</strong>을 입력하면 이미지를 자동으로 불러옵니다.' +
-      '</p>'
+  return (
+    card('Google Apps Script 연동 <span style="color:#16a34a;font-size:11px;font-weight:600;">권장</span>', true,
+      field('Apps Script 웹 앱 URL',
+        '<input id="drive-scripturl" class="admin-input" value="' + esc(gd.appsScriptUrl || '') + '" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">' +
+        '<p class="admin-hint">' +
+          '이 URL을 설정하면 Drive 폴더에서 이미지 목록을 제한 없이 가져올 수 있습니다.<br>' +
+          '<strong>설정 방법:</strong> ' +
+          '<a href="https://script.google.com/home" target="_blank" rel="noopener" style="color:#2563EB;">Google Apps Script</a>에서 새 프로젝트 생성 → 코드 붙여넣기 → 웹 앱으로 배포 → URL 복사.' +
+          '<br>어드민 패널 우하단에 복사할 Apps Script 코드가 있습니다.' +
+        '</p>'
+      )
+    ) +
+    card('Google Drive API 키 <span style="color:#6b7280;font-size:11px;">(선택)</span>', false,
+      field('API 키',
+        '<input id="drive-apikey" type="password" class="admin-input" value="' + esc(gd.apiKey || '') + '" placeholder="AIzaSy…" autocomplete="off">' +
+        '<p class="admin-hint">' +
+          'Apps Script URL이 설정되지 않은 경우 Drive API 키를 사용합니다.<br>' +
+          '단, API 키 방식은 "인터넷의 모든 사용자에게 공개" 설정된 파일만 조회 가능합니다.' +
+        '</p>'
+      )
+    ) +
+    card('Apps Script 코드', false,
+      '<p class="admin-hint" style="margin-bottom:8px;">아래 코드를 <a href="https://script.google.com/home" target="_blank" style="color:#2563eb;">script.google.com</a>에서 새 프로젝트에 붙여넣고 저장하세요.</p>' +
+      '<textarea class="admin-textarea" rows="14" readonly onclick="this.select()" style="font-family:monospace;font-size:11px;">' +
+      esc(getAppsScriptCode()) +
+      '</textarea>' +
+      '<p class="admin-hint">배포 방법: 오른쪽 상단 <strong>배포 → 새 배포</strong> → 유형: 웹 앱 → 실행 주체: 나 → 액세스 권한: <strong>모든 사용자</strong> → 배포 → URL 복사 → 위 필드에 붙여넣기</p>'
     )
   );
 }
 
+function getAppsScriptCode() {
+  return [
+    'function doGet(e) {',
+    '  var result;',
+    '  try {',
+    '    var folderId = e.parameter.folderId;',
+    '    if (!folderId) throw new Error("folderId required");',
+    '    var folder = DriveApp.getFolderById(folderId);',
+    '    var files = folder.getFiles();',
+    '    var items = [];',
+    '    while (files.hasNext()) {',
+    '      var file = files.next();',
+    '      if (file.getMimeType().indexOf("image/") === 0) {',
+    '        items.push({ id: file.getId(), name: file.getName() });',
+    '      }',
+    '    }',
+    '    items.sort(function(a, b) {',
+    '      return a.name.localeCompare(b.name, undefined, { numeric: true });',
+    '    });',
+    '    result = { files: items };',
+    '  } catch(err) {',
+    '    result = { error: err.message };',
+    '  }',
+    '  var output = ContentService',
+    '    .createTextOutput(JSON.stringify(result))',
+    '    .setMimeType(ContentService.MimeType.JSON);',
+    '  return output;',
+    '}'
+  ].join('\n');
+}
+
 function bindSettingsIntegrations() {
-  liveInput('drive-apikey', function(v){ S.config.googleDrive.apiKey = v; });
+  if (!S.config.googleDrive) S.config.googleDrive = {};
+  liveInput('drive-scripturl', function(v){ S.config.googleDrive.appsScriptUrl = v; });
+  liveInput('drive-apikey',    function(v){ S.config.googleDrive.apiKey = v; });
   bindCardToggles();
 }
 
@@ -807,9 +861,9 @@ async function importDriveFolder() {
     return;
   }
 
-  var apiKey = S.config.googleDrive && S.config.googleDrive.apiKey;
-  if (!apiKey) {
-    showToast('연동 설정에서 Google Drive API 키를 먼저 설정하세요.', 'error');
+  var gd = S.config.googleDrive || {};
+  if (!gd.appsScriptUrl && !gd.apiKey) {
+    showToast('연동 설정에서 Apps Script URL 또는 Drive API 키를 먼저 설정하세요.', 'error');
     return;
   }
 
@@ -818,7 +872,7 @@ async function importDriveFolder() {
   if (hint) hint.style.display = 'none';
 
   try {
-    var files = await listDriveFolderImages(folderId, apiKey);
+    var files = await listDriveFolderImages(folderId);
 
     if (files.length === 0) {
       if (hint) {
@@ -864,27 +918,45 @@ function extractDriveFolderIdLocal(url) {
   return match ? match[1] : null;
 }
 
-async function listDriveFolderImages(folderId, apiKey) {
-  var q        = encodeURIComponent("'" + folderId + "' in parents and mimeType contains 'image/' and trashed = false");
-  var fields   = encodeURIComponent('files(id,name)');
-  var endpoint = 'https://www.googleapis.com/drive/v3/files' +
-    '?q=' + q + '&key=' + encodeURIComponent(apiKey) +
-    '&fields=' + fields + '&pageSize=200&orderBy=name';
+async function listDriveFolderImages(folderId) {
+  var gd            = S.config.googleDrive || {};
+  var scriptUrl     = gd.appsScriptUrl && gd.appsScriptUrl.trim();
+  var apiKey        = gd.apiKey && gd.apiKey.trim();
 
-  var res = await fetch(endpoint);
-  if (!res.ok) {
-    var errData = await res.json().catch(function() { return {}; });
-    throw new Error(
-      (errData.error && errData.error.message) ? errData.error.message : 'HTTP ' + res.status
-    );
+  /* ── 방법 1: Apps Script URL (권장) ───────────────────── */
+  if (scriptUrl) {
+    var res = await fetch(scriptUrl + '?folderId=' + encodeURIComponent(folderId));
+    if (!res.ok) throw new Error('Apps Script 응답 오류: HTTP ' + res.status);
+    var data = await res.json();
+    if (data.error) throw new Error('Apps Script 오류: ' + data.error);
+    if (data.files && data.files.length > 0) {
+      return data.files.map(function(f) {
+        return { url: 'https://lh3.googleusercontent.com/d/' + f.id, name: f.name };
+      });
+    }
+    return []; /* 빈 폴더 */
   }
-  var data = await res.json();
-  return (data.files || []).map(function(file) {
-    return {
-      url:  'https://lh3.googleusercontent.com/d/' + file.id,
-      name: file.name
-    };
-  });
+
+  /* ── 방법 2: Drive API 키 (폴더가 완전 공개인 경우만 동작) ── */
+  if (apiKey) {
+    var q        = encodeURIComponent("'" + folderId + "' in parents and mimeType contains 'image/' and trashed = false");
+    var fields   = encodeURIComponent('files(id,name)');
+    var endpoint = 'https://www.googleapis.com/drive/v3/files' +
+      '?q=' + q + '&key=' + apiKey +
+      '&fields=' + fields + '&pageSize=200&orderBy=name';
+
+    var r = await fetch(endpoint);
+    if (!r.ok) {
+      var errData = await r.json().catch(function() { return {}; });
+      throw new Error((errData.error && errData.error.message) || 'HTTP ' + r.status);
+    }
+    var d = await r.json();
+    return (d.files || []).map(function(file) {
+      return { url: 'https://lh3.googleusercontent.com/d/' + file.id, name: file.name };
+    });
+  }
+
+  throw new Error('Apps Script URL 또는 Drive API 키를 연동 설정에서 입력하세요.');
 }
 
 function addImageUrl() {
