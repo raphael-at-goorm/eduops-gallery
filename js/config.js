@@ -39,7 +39,7 @@ const SITE_CONFIG = {
   },
   "googleDrive": {
     "apiKey": "AIzaSyC66hx3nENh1WSC-ALbr1_eWlS_5OJ7HiM",
-    "appsScriptUrl": ""
+    "appsScriptUrl": "https://script.google.com/macros/s/AKfycbywL8iHNlIwP1F5pSVEJE8GfSydGZymqyAeCFeU6yqzTEPc2F0lKIq8NJ8E4UUKSTvOwQ/exec"
   },
   "footerCategories": [
     {
