@@ -12,7 +12,7 @@ const SITE_CONFIG = {
     "logoUrl": "https://drive.google.com/file/d/17Rds0QRCgpEmWtV7sDy_J2DWZrygpBF4/view?usp=sharing"
   },
   "hero": {
-    "label": "goorm DEEP DIVE",
+    "label": "DEEP DIVE",
     "title": "A New Dimension of Immersion",
     "description": "Explore a curated archive of photographs capturing the moments, atmosphere, and connections that define the goorm DEEP DIVE experience.",
     "ctaPrimary": "Explore All Events →",
