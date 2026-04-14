@@ -33,7 +33,7 @@ const SITE_CONFIG = {
     "recentTitle": "Recent Events",
     "recentSubtitle": "",
     "recentBrowseAll": "Browse All Events",
-    "ctaTitle": "Experience Premium Events",
+    "ctaTitle": "Experience DEEP DIVE Events",
     "ctaText": "Each event is carefully documented to preserve the atmosphere, energy, and special moments that make our gatherings unforgettable.",
     "ctaButton": "Explore Event Galleries →"
   },
