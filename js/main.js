@@ -3,6 +3,9 @@
  */
 
 document.addEventListener('DOMContentLoaded', function () {
+  var brand = SITE_CONFIG.brand || {};
+  if (brand.name) document.title = brand.name + (brand.tagline ? ' — ' + brand.tagline : '');
+
   injectLayout();
   updateHero();
   updateStats();

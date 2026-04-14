@@ -70,7 +70,8 @@ function renderEventHero(event) {
   }
 
   /* Page title */
-  document.title = escapeHtml(event.title) + ' — Prestige Events';
+  var brandName = (SITE_CONFIG.brand && SITE_CONFIG.brand.name) || 'Events';
+  document.title = escapeHtml(event.title) + ' — ' + brandName;
 
   /* Hero section */
   var heroEl = document.getElementById('event-hero');

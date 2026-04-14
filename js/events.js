@@ -5,6 +5,9 @@
 var currentFilters = { search: '', year: '', category: '' };
 
 document.addEventListener('DOMContentLoaded', function () {
+  var brand = SITE_CONFIG.brand || {};
+  if (brand.name) document.title = 'All Events — ' + brand.name;
+
   injectEventsLayout();
   populateFilters();
   readUrlParams();
