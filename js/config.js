@@ -28,10 +28,10 @@ const SITE_CONFIG = {
   },
   "sections": {
     "featuredTitle": "Featured Events",
-    "featuredSubtitle": "Highlighted moments from our premium collection",
+    "featuredSubtitle": "",
     "featuredViewAll": "View All",
     "recentTitle": "Recent Events",
-    "recentSubtitle": "Latest additions to our gallery collection",
+    "recentSubtitle": "",
     "recentBrowseAll": "Browse All Events",
     "ctaTitle": "Experience Premium Events",
     "ctaText": "Each event is carefully documented to preserve the atmosphere, energy, and special moments that make our gatherings unforgettable.",
