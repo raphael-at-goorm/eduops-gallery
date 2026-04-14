@@ -31,7 +31,7 @@ const EVENTS_DATA = [
     "category": "hackathon",
     "year": "2025",
     "coverImage": "https://drive.google.com/file/d/1Q8ZTq_faDkWtxRjjhpkgIq2q3P-hLuau/view?usp=sharing",
-    "featured": true,
+    "featured": false,
     "recent": true,
     "driveFolderUrl": "https://drive.google.com/drive/folders/1_XiVVzWr7sbfS4uuetIFIwnnRCIrh6_Q",
     "images": [
@@ -247,7 +247,7 @@ const EVENTS_DATA = [
     "category": "hackathon",
     "year": "2024",
     "coverImage": "https://drive.google.com/file/d/1po-l5PlaZOIi33s_d-HGDXorNeVqKTVA/view?usp=drive_link",
-    "featured": true,
+    "featured": false,
     "recent": true,
     "driveFolderUrl": "https://drive.google.com/drive/folders/1dr2OXtaFLQ0YOiAC3WfioWetu43Gg1T8?usp=sharing",
     "images": [
