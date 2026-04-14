@@ -31,8 +31,8 @@ const EVENTS_DATA = [
     "category": "hackathon",
     "year": "2025",
     "coverImage": "https://drive.google.com/file/d/1Q8ZTq_faDkWtxRjjhpkgIq2q3P-hLuau/view?usp=sharing",
-    "featured": false,
-    "recent": false,
+    "featured": true,
+    "recent": true,
     "driveFolderUrl": "https://drive.google.com/drive/folders/1_XiVVzWr7sbfS4uuetIFIwnnRCIrh6_Q",
     "images": [
       "https://lh3.googleusercontent.com/d/1TaPd1yKQMteSrlXHrFwKU0RRqgkQw8oK",
