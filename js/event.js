@@ -128,7 +128,15 @@ async function loadGallery(event) {
   /* Try Drive folder API first */
   if (folderId && SITE_CONFIG.googleDrive.apiKey) {
     try {
-      galleryImages = await fetchDriveImages(folderId);
+      var driveResult = await fetchDriveImages(folderId);
+      if (driveResult.length > 0) {
+        galleryImages = driveResult;
+      } else {
+        /* API 응답은 200이지만 파일 없음 → 권한 문제 */
+        driveError = 'Drive API가 파일 목록을 반환하지 않았습니다. ' +
+          '폴더 및 파일의 공유 설정을 확인하세요 (아래 안내 참고).';
+        galleryImages = [];
+      }
     } catch (err) {
       console.warn('[Drive] API 오류:', err.message);
       driveError    = err.message;
@@ -141,11 +149,8 @@ async function loadGallery(event) {
     galleryImages = (event.images || []).map(function (url) {
       return { url: url, thumb: url, name: '' };
     });
-    if (driveError && galleryImages.length === 0) {
-      /* Keep driveError so the empty-state can show it */
-    } else {
-      driveError = null; /* images[] worked fine, suppress Drive error */
-    }
+    /* images[]에 항목이 있으면 Drive 오류는 숨김 */
+    if (galleryImages.length > 0) driveError = null;
   }
 
   if (galleryImages.length === 0) {
@@ -202,8 +207,8 @@ function buildEmptyGalleryHtml(event, driveError) {
 function buildGalleryHtml(images, event) {
   var items = images.map(function (img, idx) {
     var isLarge = idx === 0;
-    var thumbSrc = driveToImg(img.thumb || img.url);        // 썸네일: lh3 형식
-    var fullSrc  = driveToImg(img.url, true);               // 라이트박스: 원본 화질
+    var thumbSrc = driveToImg(img.thumb || img.url);   // 썸네일: lh3 형식
+    var fullSrc  = driveToImg(img.url);                // 라이트박스: lh3 형식 (uc?export=view는 브라우저에서 로드 불가)
     return `
       <div
         class="gallery-item${isLarge ? ' gallery-item--lg' : ''}"
@@ -302,7 +307,7 @@ function updateLightboxImage() {
   var image   = galleryImages[lightboxIndex];
 
   if (img) {
-    img.src = driveToImg(image.url, true); // 라이트박스: 원본 화질
+    img.src = driveToImg(image.url); // 라이트박스: lh3 형식
     img.alt = image.name || ('Image ' + (lightboxIndex + 1));
   }
   if (counter) {

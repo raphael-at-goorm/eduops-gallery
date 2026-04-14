@@ -717,14 +717,17 @@ function renderEventEditView() {
 
     card('갤러리 이미지', true,
       field('Google Drive 폴더 URL',
-        '<input id="ev-driveUrl" class="admin-input" value="' + esc(_editEv.driveFolderUrl || '') + '" placeholder="https://drive.google.com/drive/folders/…">' +
-        '<p class="admin-hint">폴더를 "링크가 있는 모든 사용자 — 뷰어"로 공유 후 URL 입력. API 키 설정 시 자동 로드됩니다.</p>'
+        '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<input id="ev-driveUrl" class="admin-input" value="' + esc(_editEv.driveFolderUrl || '') + '" placeholder="https://drive.google.com/drive/folders/…" style="flex:1;">' +
+          '<button class="btn-admin btn-admin--ghost btn-admin--sm" id="drive-import-btn" style="white-space:nowrap;flex-shrink:0;">📥 가져오기</button>' +
+        '</div>' +
+        '<p class="admin-hint" id="drive-import-hint">Drive 폴더 URL 입력 후 <strong>가져오기</strong>를 누르면 폴더 내 이미지 목록을 아래에 자동으로 추가합니다.<br>' +
+        '⚠️ 가져오기가 실패하면 <strong>파일을 "인터넷의 모든 사용자에게 공개"</strong>로 설정하거나, 아래에 파일 공유 링크를 하나씩 추가하세요.</p>'
       ) +
-      '<div class="admin-label" style="margin-bottom:8px;">갤러리 이미지 URL 목록 <span>(Drive 폴더 미설정 시 / API 키 없을 때 사용)</span></div>' +
-      '<p class="admin-hint" style="margin-bottom:8px;">Google Drive 파일 공유 링크(https://drive.google.com/file/d/…/view)를 직접 추가할 수 있습니다.</p>' +
+      '<div class="admin-label" style="margin-bottom:8px;">이미지 URL 목록</div>' +
       '<div class="image-list" id="image-list">' + imgList + '</div>' +
       '<div class="image-add-row">' +
-        '<input id="img-url-input" class="admin-input" placeholder="https://… 이미지 URL">' +
+        '<input id="img-url-input" class="admin-input" placeholder="https://drive.google.com/file/d/…/view 또는 직접 URL">' +
         '<button class="btn-admin btn-admin--ghost btn-admin--sm" id="img-add-btn">추가</button>' +
       '</div>'
     )
@@ -784,7 +787,104 @@ function bindEventEditView() {
   on('img-add-btn', 'click', addImageUrl);
   on('img-url-input', 'keydown', function(e) { if (e.key === 'Enter') addImageUrl(); });
 
+  // Drive 폴더에서 이미지 가져오기
+  on('drive-import-btn', 'click', importDriveFolder);
+
   bindCardToggles();
+}
+
+async function importDriveFolder() {
+  var urlEl  = document.getElementById('ev-driveUrl');
+  var btn    = document.getElementById('drive-import-btn');
+  var hint   = document.getElementById('drive-import-hint');
+  if (!urlEl || !btn) return;
+
+  var folderUrl = urlEl.value.trim();
+  var folderId  = extractDriveFolderIdLocal(folderUrl);
+
+  if (!folderId) {
+    showToast('올바른 Drive 폴더 URL을 입력하세요.', 'error');
+    return;
+  }
+
+  var apiKey = S.config.googleDrive && S.config.googleDrive.apiKey;
+  if (!apiKey) {
+    showToast('연동 설정에서 Google Drive API 키를 먼저 설정하세요.', 'error');
+    return;
+  }
+
+  btn.textContent = '불러오는 중…';
+  btn.disabled    = true;
+  if (hint) hint.style.display = 'none';
+
+  try {
+    var files = await listDriveFolderImages(folderId, apiKey);
+
+    if (files.length === 0) {
+      if (hint) {
+        hint.innerHTML =
+          '<span style="color:#dc2626;font-weight:600;">⚠️ Drive API가 이미지를 찾지 못했습니다.</span><br>' +
+          '아래 단계를 확인하세요:<br>' +
+          '<ol style="margin:6px 0 0 16px;font-size:12px;line-height:1.8;">' +
+            '<li><a href="https://console.cloud.google.com/" target="_blank" style="color:#2563eb;">Google Cloud Console</a>에서 <strong>Google Drive API</strong>가 활성화되어 있는지 확인</li>' +
+            '<li>API 키의 <strong>HTTP 참조자 제한</strong>에 <code>raphael-at-goorm.github.io/*</code>가 포함되어 있는지 확인 (없으면 "모든 사이트 허용"으로 변경)</li>' +
+            '<li>Google Drive 폴더에서 <strong>공유 설정 → "인터넷의 모든 사용자에게 공개"</strong>로 변경 (링크 공유만으로는 API 조회 불가)</li>' +
+            '<li>위 방법이 불가하면 각 이미지 파일에서 <strong>공유 링크를 복사</strong>해 아래 이미지 목록에 하나씩 추가하세요.</li>' +
+          '</ol>';
+        hint.style.display = 'block';
+      }
+      showToast('이미지를 찾지 못했습니다. 공유 설정을 확인하세요.', 'error');
+    } else {
+      _editEv.images = (_editEv.images || []).concat(
+        files.map(function(f) { return f.url; })
+      );
+      refreshImageList();
+      markDirty();
+      if (hint) {
+        hint.innerHTML = '✓ ' + files.length + '개 이미지를 가져왔습니다. 저장 후 배포하세요.';
+        hint.style.display = 'block';
+      }
+      showToast(files.length + '개 이미지를 가져왔습니다.', 'success');
+    }
+  } catch (err) {
+    if (hint) {
+      hint.innerHTML = '<span style="color:#dc2626;font-weight:600;">API 오류: ' + esc(err.message) + '</span>';
+      hint.style.display = 'block';
+    }
+    showToast('Drive API 오류: ' + err.message, 'error');
+  } finally {
+    btn.textContent = '📥 가져오기';
+    btn.disabled    = false;
+  }
+}
+
+function extractDriveFolderIdLocal(url) {
+  if (!url) return null;
+  var match = url.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : null;
+}
+
+async function listDriveFolderImages(folderId, apiKey) {
+  var q        = encodeURIComponent("'" + folderId + "' in parents and mimeType contains 'image/' and trashed = false");
+  var fields   = encodeURIComponent('files(id,name)');
+  var endpoint = 'https://www.googleapis.com/drive/v3/files' +
+    '?q=' + q + '&key=' + encodeURIComponent(apiKey) +
+    '&fields=' + fields + '&pageSize=200&orderBy=name';
+
+  var res = await fetch(endpoint);
+  if (!res.ok) {
+    var errData = await res.json().catch(function() { return {}; });
+    throw new Error(
+      (errData.error && errData.error.message) ? errData.error.message : 'HTTP ' + res.status
+    );
+  }
+  var data = await res.json();
+  return (data.files || []).map(function(file) {
+    return {
+      url:  'https://lh3.googleusercontent.com/d/' + file.id,
+      name: file.name
+    };
+  });
 }
 
 function addImageUrl() {

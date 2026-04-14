@@ -39,7 +39,7 @@ function updateHero() {
   if (ctaSecondary) ctaSecondary.textContent = h.ctaSecondary;
 
   var img = document.getElementById('hero-image');
-  if (img && h.image) img.src = driveToImg(h.image, true);
+  if (img && h.image) img.src = driveToImg(h.image);
 
   setText('hero-caption-title', h.captionTitle);
   setText('hero-caption-text', h.captionText);

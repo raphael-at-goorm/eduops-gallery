@@ -292,8 +292,8 @@ async function fetchDriveImages(folderId) {
 
   const data = await res.json();
   return (data.files || []).map(file => ({
-    url:   `https://drive.google.com/uc?export=view&id=${file.id}`,
-    thumb: `https://drive.google.com/thumbnail?id=${file.id}&sz=w600`,
+    url:   `https://lh3.googleusercontent.com/d/${file.id}`,
+    thumb: `https://lh3.googleusercontent.com/d/${file.id}`,
     name:  file.name
   }));
 }
